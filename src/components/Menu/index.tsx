@@ -1,50 +1,75 @@
+import { useState } from 'react';
 import { FlatList } from 'react-native';
 
-import { products } from '../../mocks/products';
+import { Product } from '../../types/Products';
 import { formatCurrency } from '../../utils';
 
 import { CustomText } from '../CustomText';
 import { PlusCircle } from '../Icons/PlusCircle';
+import { ProductModal } from '../ProductModal';
 
-import { ProductImage,
-  Product,
+import {
+  ProductImage,
+  ProductContainer,
   ProductDetails,
   Separator,
   AddToCartButton
 } from './styles';
 
-export function Menu() {
-  return (
-    <FlatList
-      data={products}
-      style={{ marginTop: 32 }}
-      contentContainerStyle={{ paddingHorizontal: 24 }}
-      ItemSeparatorComponent={Separator}
-      keyExtractor={product => product._id}
-      renderItem={({ item: product }) => (
-        <Product>
-          <ProductImage
-            source={{
-              uri: `http://localhost:3001/uploads/${product.imagePath}`,
-            }}
-          />
-          <ProductDetails>
-            <CustomText weight='600'>
-              {product.name}
-            </CustomText>
-            <CustomText size={14} color="#666" style={{ marginVertical: 8 }}>
-              {product.description}
-            </CustomText>
-            <CustomText size={14} weight="600">
-              {formatCurrency(product.price)}
-            </CustomText>
-          </ProductDetails>
+interface MenuProps {
+  onAddToCart: (product: Product) => void;
+  products: Array<Product>;
+}
 
-          <AddToCartButton>
-            <PlusCircle />
-          </AddToCartButton>
-        </Product>
-      )}
-    />
+export function Menu({ onAddToCart, products }: MenuProps) {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<null | Product>(null);
+
+  function handleOpenModal(product: Product) {
+    setIsModalVisible(true);
+    setSelectedProduct(product);
+  }
+
+  return (
+    <>
+      <FlatList
+        data={products}
+        style={{ marginTop: 32 }}
+        contentContainerStyle={{ paddingHorizontal: 24 }}
+        ItemSeparatorComponent={Separator}
+        keyExtractor={product => product._id}
+        renderItem={({ item: product }) => (
+          <ProductContainer onPress={() => handleOpenModal(product)}>
+            <ProductImage
+              source={{
+                uri: `http://localhost:3001/uploads/${product.imagePath}`,
+              }}
+            />
+            <ProductDetails>
+              <CustomText weight='600'>
+                {product.name}
+              </CustomText>
+              <CustomText size={14} color="#666" style={{ marginVertical: 8 }}>
+                {product.description}
+              </CustomText>
+              <CustomText size={14} weight="600">
+                {formatCurrency(product.price)}
+              </CustomText>
+            </ProductDetails>
+
+            <AddToCartButton onPress={() => onAddToCart(product)}>
+              <PlusCircle />
+            </AddToCartButton>
+          </ProductContainer>
+        )}
+      />
+
+      <ProductModal
+        visible={isModalVisible}
+        product={selectedProduct}
+        onClose={() => setIsModalVisible(false)}
+        onAddToCart={onAddToCart}
+      />
+    </>
   );
 }
