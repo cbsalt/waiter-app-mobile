@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FlatList } from 'react-native';
 
 import { categories } from '../../mocks/categories';
+
 import { CustomText } from '../CustomText';
 
 import { Category, Icon } from './styles';
